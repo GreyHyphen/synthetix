@@ -19,12 +19,12 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     using SafeMath for uint;
     using SafeDecimalMath for uint;
 
-    bytes32 internal constant SNX = "SNX";
+    bytes32 internal constant DJT = "DJT";
     bytes32 internal constant ETH = "ETH";
 
     /* ========== STATE VARIABLES ========== */
 
-    // Address where the ether and Synths raised for selling SNX is transfered to
+    // Address where the ether and Synths raised for selling DJT is transfered to
     // Any ether raised for selling Synths gets sent back to whoever deposited the Synths,
     // and doesn't have anything to do with this address.
     address payable public fundsWallet;
@@ -271,64 +271,64 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         return _exchangeEtherForSynths();
     }
 
-    function _exchangeEtherForSNX() internal returns (uint) {
-        // How many SNX are they going to be receiving?
+    function _exchangeEtherForDJT() internal returns (uint) {
+        // How many DJT are they going to be receiving?
         uint synthetixToSend = synthetixReceivedForEther(msg.value);
 
         // Store the ETH in our funds wallet
         fundsWallet.transfer(msg.value);
 
-        // And send them the SNX.
+        // And send them the DJT.
         synthetix().transfer(msg.sender, synthetixToSend);
 
-        emit Exchange("ETH", msg.value, "SNX", synthetixToSend);
+        emit Exchange("ETH", msg.value, "DJT", synthetixToSend);
 
         return synthetixToSend;
     }
 
     /**
-     * @notice Exchange ETH to SNX.
+     * @notice Exchange ETH to DJT.
      */
-    function exchangeEtherForSNX()
+    function exchangeEtherForDJT()
         external
         payable
-        rateNotInvalid(SNX)
+        rateNotInvalid(DJT)
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of SNX received
+            uint // Returns the number of DJT received
         )
     {
-        return _exchangeEtherForSNX();
+        return _exchangeEtherForDJT();
     }
 
     /**
-     * @notice Exchange ETH to SNX while insisting on a particular set of rates. This allows a user to
+     * @notice Exchange ETH to DJT while insisting on a particular set of rates. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rates.
      * @param guaranteedEtherRate The ether exchange rate which must be honored or the call will revert.
      * @param guaranteedSynthetixRate The synthetix exchange rate which must be honored or the call will revert.
      */
-    function exchangeEtherForSNXAtRate(uint guaranteedEtherRate, uint guaranteedSynthetixRate)
+    function exchangeEtherForDJTAtRate(uint guaranteedEtherRate, uint guaranteedSynthetixRate)
         external
         payable
-        rateNotInvalid(SNX)
+        rateNotInvalid(DJT)
         rateNotInvalid(ETH)
         notPaused
         returns (
-            uint // Returns the number of SNX received
+            uint // Returns the number of DJT received
         )
     {
         require(guaranteedEtherRate == exchangeRates().rateForCurrency(ETH), "Guaranteed ether rate would not be received");
         require(
-            guaranteedSynthetixRate == exchangeRates().rateForCurrency(SNX),
+            guaranteedSynthetixRate == exchangeRates().rateForCurrency(DJT),
             "Guaranteed synthetix rate would not be received"
         );
 
-        return _exchangeEtherForSNX();
+        return _exchangeEtherForDJT();
     }
 
-    function _exchangeSynthsForSNX(uint synthAmount) internal returns (uint) {
-        // How many SNX are they going to be receiving?
+    function _exchangeSynthsForDJT(uint synthAmount) internal returns (uint) {
+        // How many DJT are they going to be receiving?
         uint synthetixToSend = synthetixReceivedForSynths(synthAmount);
 
         // Ok, transfer the Synths to our funds wallet.
@@ -336,51 +336,51 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         // they're sent back in from the funds wallet.
         synthsUSD().transferFrom(msg.sender, fundsWallet, synthAmount);
 
-        // And send them the SNX.
+        // And send them the DJT.
         synthetix().transfer(msg.sender, synthetixToSend);
 
-        emit Exchange("sUSD", synthAmount, "SNX", synthetixToSend);
+        emit Exchange("sUSD", synthAmount, "DJT", synthetixToSend);
 
         return synthetixToSend;
     }
 
     /**
-     * @notice Exchange sUSD for SNX
+     * @notice Exchange sUSD for DJT
      * @param synthAmount The amount of synths the user wishes to exchange.
      */
-    function exchangeSynthsForSNX(uint synthAmount)
+    function exchangeSynthsForDJT(uint synthAmount)
         external
-        rateNotInvalid(SNX)
+        rateNotInvalid(DJT)
         notPaused
         returns (
-            uint // Returns the number of SNX received
+            uint // Returns the number of DJT received
         )
     {
-        return _exchangeSynthsForSNX(synthAmount);
+        return _exchangeSynthsForDJT(synthAmount);
     }
 
     /**
-     * @notice Exchange sUSD for SNX while insisting on a particular rate. This allows a user to
+     * @notice Exchange sUSD for DJT while insisting on a particular rate. This allows a user to
      *         exchange while protecting against frontrunning by the contract owner on the exchange rate.
      * @param synthAmount The amount of synths the user wishes to exchange.
      * @param guaranteedRate A rate (synthetix price) the caller wishes to insist upon.
      */
-    function exchangeSynthsForSNXAtRate(uint synthAmount, uint guaranteedRate)
+    function exchangeSynthsForDJTAtRate(uint synthAmount, uint guaranteedRate)
         external
-        rateNotInvalid(SNX)
+        rateNotInvalid(DJT)
         notPaused
         returns (
-            uint // Returns the number of SNX received
+            uint // Returns the number of DJT received
         )
     {
-        require(guaranteedRate == exchangeRates().rateForCurrency(SNX), "Guaranteed rate would not be received");
+        require(guaranteedRate == exchangeRates().rateForCurrency(DJT), "Guaranteed rate would not be received");
 
-        return _exchangeSynthsForSNX(synthAmount);
+        return _exchangeSynthsForDJT(synthAmount);
     }
 
     /**
-     * @notice Allows the owner to withdraw SNX from this contract if needed.
-     * @param amount The amount of SNX to attempt to withdraw (in 18 decimal places).
+     * @notice Allows the owner to withdraw DJT from this contract if needed.
+     * @param amount The amount of DJT to attempt to withdraw (in 18 decimal places).
      */
     function withdrawSynthetix(uint amount) external onlyOwner {
         synthetix().transfer(owner, amount);
@@ -470,17 +470,17 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
     }
 
     /**
-     * @notice Calculate how many SNX you will receive if you transfer
+     * @notice Calculate how many DJT you will receive if you transfer
      *         an amount of synths.
      * @param amount The amount of synths (in 18 decimal places) you want to ask about
      */
     function synthetixReceivedForSynths(uint amount) public view returns (uint) {
-        // And what would that be worth in SNX based on the current price?
-        return amount.divideDecimal(exchangeRates().rateForCurrency(SNX));
+        // And what would that be worth in DJT based on the current price?
+        return amount.divideDecimal(exchangeRates().rateForCurrency(DJT));
     }
 
     /**
-     * @notice Calculate how many SNX you will receive if you transfer
+     * @notice Calculate how many DJT you will receive if you transfer
      *         an amount of ether.
      * @param amount The amount of ether (in wei) you want to ask about
      */
@@ -488,7 +488,7 @@ contract Depot is Owned, Pausable, ReentrancyGuard, MixinResolver, IDepot {
         // How much is the ETH they sent us worth in sUSD (ignoring the transfer fee)?
         uint valueSentInSynths = amount.multiplyDecimal(exchangeRates().rateForCurrency(ETH));
 
-        // Now, how many SNX will that USD amount buy?
+        // Now, how many DJT will that USD amount buy?
         return synthetixReceivedForSynths(valueSentInSynths);
     }
 
